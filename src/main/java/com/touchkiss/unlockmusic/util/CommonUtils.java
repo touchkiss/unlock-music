@@ -26,15 +26,6 @@ public class CommonUtils {
         return true;
     }
 
-    public static boolean isBytesEquals(byte[] a, byte[] b, int bStartPosition) {
-        for (int i = 0; i < a.length; i++) {
-            if (a[i] != b[i + bStartPosition]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public static short[] listToIntArray(List<Short> list) {
         short[] result = new short[list.size()];
         for (int i = 0; i < list.size(); i++) {
@@ -48,6 +39,53 @@ public class CommonUtils {
             put("Content-Type", "application/json");
         }});
         System.out.println(response);
+    }
+
+    public static String detectAudioExt(byte[] data, String fallbackExt) {
+        if (isBytesEquals(MP3_HEADER, data, 0)) {
+            return "mp3";
+        }
+        if (isBytesEquals(FLAC_HEADER, data, 0)) {
+            return "flac";
+        }
+        if (isBytesEquals(OGG_HEADER, data, 0)) {
+            return "ogg";
+        }
+        if (isBytesEquals(M4A_HEADER, data, 4)) {
+            return "m4a";
+        }
+        return fallbackExt;
+    }
+
+    public static boolean isBytesEquals(byte[] a, byte[] b, int bStartPosition) {
+        for (int i = 0; i < a.length; i++) {
+            if (a[i] != b[i + bStartPosition]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static short byte2short(byte[] b) {
+        short l = 0;
+        for (int i = 0; i < 2; i++) {
+            l <<= 8; //<<=和我们的 +=是一样的，意思就是 l = l << 8
+            l |= (b[i] & 0xff); //和上面也是一样的  l = l | (b[i]&0xff)
+        }
+        return l;
+    }
+
+    public static String Byte2String(byte nByte) {
+        StringBuilder nStr = new StringBuilder();
+        for (int i = 7; i >= 0; i--) {
+            int j = (int) nByte & (int) (Math.pow(2, (double) i));
+            if (j > 0) {
+                nStr.append("1");
+            } else {
+                nStr.append("0");
+            }
+        }
+        return nStr.toString();
     }
 
     public static class QueryKeyInfoRequestBody {
@@ -88,41 +126,5 @@ public class CommonUtils {
 
     public static class QueryKeyInfoResponseBody {
 
-    }
-
-    public static String detectAudioExt(byte[] data, String fallbackExt) {
-        if (isBytesEquals(MP3_HEADER,data,0)){
-            return "mp3";
-        }
-        if (isBytesEquals(FLAC_HEADER,data,0)){
-            return "flac";
-        }
-        if (isBytesEquals(OGG_HEADER,data,0)){
-            return "ogg";
-        }
-        if (isBytesEquals(M4A_HEADER,data,4)){
-            return "m4a";
-        }
-        return fallbackExt;
-    }
-    public static short byte2short(byte[] b){
-        short l = 0;
-        for (int i = 0; i < 2; i++) {
-            l<<=8; //<<=和我们的 +=是一样的，意思就是 l = l << 8
-            l |= (b[i] & 0xff); //和上面也是一样的  l = l | (b[i]&0xff)
-        }
-        return l;
-    }
-    public static String Byte2String(byte nByte){
-        StringBuilder nStr=new StringBuilder();
-        for(int i=7;i>=0;i--){
-            int j=(int)nByte & (int)(Math.pow(2, (double)i));
-            if(j>0){
-                nStr.append("1");
-            }else {
-                nStr.append("0");
-            }
-        }
-        return nStr.toString();
     }
 }

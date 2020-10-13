@@ -9,5 +9,5 @@ import com.touchkiss.unlockmusic.qmc.QmcMask;
  */
 @FunctionalInterface
 public interface Detector {
-    QmcMask handler(byte[]audioData) throws Exception;
+    QmcMask handler(byte[] audioData) throws Exception;
 }

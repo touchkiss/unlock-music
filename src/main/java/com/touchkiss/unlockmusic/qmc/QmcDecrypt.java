@@ -24,7 +24,14 @@ public class QmcDecrypt {
         put("mflac", new QmcHandler(new QmcMaskDetectMflac(), "flac", true));
     }};
 
-    void decrypt(File file, String rawFilename, String rawExt) {
+    public static void main(String[] args) {
+        File file = new File("D:\\music\\VipSongsDownload\\黄晓明 - 别哭，我最爱的人.mgg");
+        QmcDecrypt qmcDecrypt = new QmcDecrypt();
+        String fileName = file.getName();
+        qmcDecrypt.decrypt(file, fileName, fileName.substring(fileName.lastIndexOf(".") + 1));
+    }
+
+    void decrypt(File encryptedFile, String rawFilename, String rawExt) {
         if (!handlerMap.containsKey(rawExt)) {
             System.out.println("===================");
             System.out.println("File type is incorrect!");
@@ -34,14 +41,14 @@ public class QmcDecrypt {
         try {
             byte[] audioData, keyData;
             QmcMask seed;
-            FileInputStream fileInputStream = new FileInputStream(file);
-            int fileLength = (int) file.length();
+            FileInputStream fileInputStream = new FileInputStream(encryptedFile);
+            int fileLength = (int) encryptedFile.length();
             byte[] fileData = new byte[fileLength];
             fileInputStream.read(fileData);
             if (handler.isDetect()) {
                 audioData = new byte[fileLength - 0x170];
                 System.arraycopy(fileData, 0, audioData, 0, fileLength - 0x170);
-                 seed = handler.getDetector().handler(audioData);
+                seed = handler.getDetector().handler(audioData);
                 keyData = new byte[0x170];
                 System.arraycopy(fileData, fileLength - 0x171, keyData, 0, 0x170);
                 if (seed == null) {
@@ -66,7 +73,7 @@ public class QmcDecrypt {
             byte[] mimeInfo = new byte[128];
             System.arraycopy(dec, dec.length - 129, mimeInfo, 0, 128);
 
-            String name = file.getName();
+            String name = encryptedFile.getName();
             FileUtils.writeBytesToFile(dec, "D://" + name.substring(0, name.lastIndexOf(".") + 1) + ext);
 
         } catch (IOException e) {
@@ -74,12 +81,5 @@ public class QmcDecrypt {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        File file = new File("E:\\My Music\\VipSongsDownload\\筷子兄弟 - 小苹果.mgg");
-        QmcDecrypt qmcDecrypt = new QmcDecrypt();
-        String fileName = file.getName();
-        qmcDecrypt.decrypt(file, fileName, fileName.substring(fileName.lastIndexOf(".") + 1));
     }
 }

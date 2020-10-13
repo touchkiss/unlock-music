@@ -9,6 +9,10 @@ import com.touchkiss.unlockmusic.util.CommonUtils;
  * @author Touchkiss
  */
 public class QmcMaskDetectMflac implements Detector {
+    public static void main(String[] args) {
+        System.out.println(0b01000110 ^ 0x00ff);
+    }
+
     @Override
     public QmcMask handler(byte[] audioData) throws Exception {
         int search_len = Math.min(0x8000, audioData.length);
@@ -17,7 +21,7 @@ public class QmcMaskDetectMflac implements Detector {
             try {
                 short[] temp = new short[128];
                 for (int i = 0; i < 128; i++) {
-                    temp[i] = (short) (audioData[i + block_idx] &0x00ff);
+                    temp[i] = (short) (audioData[i + block_idx] & 0x00ff);
                 }
                 mask = new QmcMask(temp, null, null);
                 byte[] header = new byte[CommonUtils.FLAC_HEADER.length];
@@ -30,9 +34,5 @@ public class QmcMaskDetectMflac implements Detector {
             }
         }
         return mask;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(0b01000110 ^ 0x00ff);
     }
 }

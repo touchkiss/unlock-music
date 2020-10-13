@@ -1,5 +1,6 @@
 package com.touchkiss.unlockmusic.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Consts;
@@ -14,23 +15,15 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 public class HttpUtil {
-    private static Logger logger = LogManager.getLogger(HttpUtil.class);
-    /**
-     * http客户端
-     */
-    private static CloseableHttpClient httpClient = HttpClients.createDefault();
     /**
      * Get请求
      */
@@ -59,6 +52,10 @@ public class HttpUtil {
      * Trace请求
      */
     public final static String METHOD_TRACE = "TRACE";
+    /**
+     * http客户端
+     */
+    private static CloseableHttpClient httpClient = HttpClients.createDefault();
 
     /**
      * @param proxyHost 代理地址
@@ -70,6 +67,7 @@ public class HttpUtil {
         System.setProperty("https.proxyHost", proxyHost);
         System.setProperty("https.proxyPort", port + "");
         Authenticator.setDefault(new Authenticator() {
+            @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(account, new String(password).toCharArray());
             }
@@ -99,7 +97,7 @@ public class HttpUtil {
             }
             connection.disconnect();
         } catch (Exception e) {
-            logger.error("--Server Connect Error !", e);
+            log.error("--Server Connect Error !", e);
         }
         return flag;
     }
@@ -143,7 +141,7 @@ public class HttpUtil {
             HttpEntity entity = httpResponse.getEntity();
             result = EntityUtils.toString(entity, Consts.UTF_8);
         } catch (Exception e) {
-            logger.error("--http request error !", e);
+            log.error("--http request error !", e);
             result = e.getMessage();
         } finally {
             HttpClientUtils.closeQuietly(httpResponse);
@@ -194,7 +192,7 @@ public class HttpUtil {
             }
             connection.disconnect();
         } catch (Exception e) {
-            logger.error("--http request error !", e);
+            log.error("--http request error !", e);
         }
         return result;
     }
@@ -244,11 +242,10 @@ public class HttpUtil {
             }
             connection.disconnect();
         } catch (Exception e) {
-            logger.error("--http request error !", e);
+            log.error("--http request error !", e);
         }
         return result;
     }
-
 
 
     public static HashMap<String, String> get(String url) {
@@ -277,7 +274,7 @@ public class HttpUtil {
                 map.put("result_code", "ok");
                 map.put("result_data", content);
             } else {
-                logger.error((url + " 调用url status: " + response.getStatusLine().getStatusCode()));
+                log.error((url + " 调用url status: " + response.getStatusLine().getStatusCode()));
                 map.put("err_code", response.getStatusLine().getStatusCode() + "");
                 map.put("err_msg", content);
                 map.put("result_code", "fail");
@@ -286,12 +283,12 @@ public class HttpUtil {
             map.put("err_code", "500");
             map.put("err_msg", e.getMessage());
             map.put("result_code", "fail");
-            logger.error("调用【url：" + url + "】出现异常", e);
+            log.error("调用【url：" + url + "】出现异常", e);
         } catch (IOException e) {
             map.put("err_code", "500");
             map.put("err_msg", e.getMessage());
             map.put("result_code", "fail");
-            logger.error("调用【url：" + url + "】出现异常", e);
+            log.error("调用【url：" + url + "】出现异常", e);
         } finally {
             try {
                 if (httpGet != null)
@@ -299,7 +296,7 @@ public class HttpUtil {
                 if (response != null)
                     response.close();
             } catch (IOException e) {
-                logger.error("关闭连接出现异常", e);
+                log.error("关闭连接出现异常", e);
             }
         }
         return map;
@@ -317,7 +314,7 @@ public class HttpUtil {
         try {
             result = URLEncoder.encode(target, Consts.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            logger.error("--http encode error !", e);
+            log.error("--http encode error !", e);
         }
         return result;
     }
@@ -334,7 +331,7 @@ public class HttpUtil {
         try {
             result = URLDecoder.decode(target, Consts.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            logger.error("--http decode error !", e);
+            log.error("--http decode error !", e);
         }
         return result;
     }
@@ -346,8 +343,8 @@ public class HttpUtil {
      * @param file     图片下载后的文件
      * @throws IOException
      */
-   /* public static void fetchContent(String imageUrl, File file) throws IOException {
-*//*        ReadableByteChannel readableByteChannel = null;
+    /* public static void fetchContent(String imageUrl, File file) throws IOException {
+     *//*        ReadableByteChannel readableByteChannel = null;
         FileOutputStream fileOutputStream = null;
         try {
             URL url = new URL(imageUrl);
@@ -355,7 +352,7 @@ public class HttpUtil {
             fileOutputStream = new FileOutputStream(file);
             fileOutputStream.getChannel()
                     .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-            logger.error("文件下载复制完成："+imageUrl);
+            log.error("文件下载复制完成："+imageUrl);
         } catch (Exception e) {
             System.out.println("文件下载失败:" + imageUrl);
         } finally {
@@ -366,27 +363,27 @@ public class HttpUtil {
         URLConnection conn = url.openConnection();
         conn.setConnectTimeout(30000);
         InputStream input = conn.getInputStream();
-        logger.error("文件下载流完成：" + imageUrl+"文件大小"+conn.getContentLength());
+        log.error("文件下载流完成：" + imageUrl+"文件大小"+conn.getContentLength());
         BufferedInputStream bufferedInputStream = new BufferedInputStream(input);
         OutputStream output = new FileOutputStream(file);
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(output);
-        logger.error("文件下载开始写入：" + imageUrl);
+        log.error("文件下载开始写入：" + imageUrl);
 //        IOUtils.copy(bufferedInputStream,bufferedOutputStream);
         byte[] buffer = new byte[4096];
         int len;
         while ((len = bufferedInputStream.read(buffer)) != -1) {
             bufferedOutputStream.write(buffer, 0, len);
         }
-        logger.error("文件下载复制完成：" + imageUrl);
+        log.error("文件下载复制完成：" + imageUrl);
         bufferedOutputStream.close();
 //        bufferedInputStream.close();
         output.flush();
         output.close();
 //        input.close();
     }*/
-    public static void fetchContent(String imageUrl, File file) throws  IOException {
-        if (imageUrl.contains("|")){
-            imageUrl = imageUrl.replace("|","%7c");
+    public static void fetchContent(String imageUrl, File file) throws IOException {
+        if (imageUrl.contains("|")) {
+            imageUrl = imageUrl.replace("|", "%7c");
         }
         HttpGet httpget = new HttpGet(imageUrl);
         httpget.setHeader("User-Agent", "yidian-pro/4.6.2 (iPhone; iOS 11.3; Scale/3.00)");
@@ -408,29 +405,5 @@ public class HttpUtil {
         } finally {
             response.close();
         }
-    }
-
-
-    public static void setRspFileName(HttpServletRequest req, HttpServletResponse rsp, String fileName) throws UnsupportedEncodingException {
-        byte[] bytes = null;
-        //如果请求头中的User-Agent为空或者为IE内核
-        if (org.apache.commons.lang3.StringUtils.isEmpty(req.getHeader("User-Agent")) || req.getHeader("User-Agent").contains("MSIE")
-                || req.getHeader("User-Agent").contains("Trident")) {
-            bytes = fileName.trim().getBytes();
-            fileName = URLEncoder.encode(new String(bytes, "UTF-8"), "UTF-8");
-
-        }
-        //如果是火狐\谷歌等浏览器
-        else if (req.getHeader("User-Agent").contains("Firefox") || req.getHeader("User-Agent").contains("Chrome")
-                || req.getHeader("User-Agent").contains("Opera") || req.getHeader("User-Agent").contains("Safari")) {
-            bytes = fileName.trim().getBytes("UTF-8"); // name.getBytes("UTF-8")处理safari的乱码问题
-            fileName = new String(bytes, "ISO8859-1");
-        }
-        //如果为非浏览器，例如：media player等通过URL打开
-        else {
-            bytes = fileName.trim().getBytes(); // name.getBytes("UTF-8")处理safari的乱码问题
-            fileName = new String(bytes, "UTF-8");
-        }
-        rsp.addHeader("Content-Disposition", "attachment;filename=\"" + fileName + "\"");
     }
 }

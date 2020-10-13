@@ -28,6 +28,37 @@ public class QmcMask {
         }
     }
 
+    void generateMask58from128() throws Exception {
+        if (this.matrix128.length != 128) {
+            throw new Exception("incorrect mask128 length");
+        }
+        short superA = this.matrix128[0], superB = this.matrix128[8];
+        List<Short> matrix58 = new ArrayList<>();
+        for (int rowIdx = 0; rowIdx < 8; rowIdx++) {
+            int lenStart = 16 * rowIdx;
+            int lenRightStart = 120 - lenStart;
+            if (this.matrix128[lenStart] != superA || this.matrix128[lenStart + 8] != superB) {
+                System.out.println("decode mask-128 to mask-58 failed");
+            }
+            short[] rowLeft = new short[7];
+            System.arraycopy(this.matrix128, lenStart + 1, rowLeft, 0, 7);
+            short[] rowRight = new short[7];
+            for (int i = 7; i > 0; i--) {
+                rowRight[7 - i] = this.matrix128[lenRightStart + i];
+            }
+            if (CommonUtils.isArrayEquals(rowLeft, rowRight)) {
+                for (short i : rowLeft) {
+                    matrix58.add(i);
+                }
+            } else {
+                System.out.println("decode mask-128 to mask-58 failed");
+            }
+        }
+        this.matrix58 = CommonUtils.listToIntArray(matrix58);
+        this.super58A = superA;
+        this.super58B = superB;
+    }
+
     void generateMask128from58() throws Exception {
         if (this.matrix58.length != 56) {
             throw new Exception("incorrect mask58 matrix length");
@@ -44,37 +75,6 @@ public class QmcMask {
             }
         }
         this.matrix128 = CommonUtils.listToIntArray(matrix128);
-    }
-
-    void generateMask58from128() throws Exception {
-        if (this.matrix128.length != 128) {
-            throw new Exception("incorrect mask128 length");
-        }
-        short superA = this.matrix128[0], superB = this.matrix128[8];
-        List<Short> matrix58 = new ArrayList<>();
-        for (int rowIdx = 0; rowIdx < 8; rowIdx++) {
-            int lenStart = 16 * rowIdx;
-            int lenRightStart = 120 - lenStart;
-            if (this.matrix128[lenStart] != superA || this.matrix128[lenStart + 8] != superB) {
-                System.out.println("decode mask-128 to mask-58 failed");
-            }
-            short[] rowLeft = new short[7];
-            System.arraycopy(this.matrix128, lenStart + 1, rowLeft, 0, 7);
-            short[] rowRight = new short[7];
-            for (int i =  7; i > 0; i--) {
-                rowRight[7-i]=this.matrix128[lenRightStart+i];
-            }
-            if (CommonUtils.isArrayEquals(rowLeft, rowRight)) {
-                for (short i : rowLeft) {
-                    matrix58.add(i);
-                }
-            } else {
-                System.out.println("decode mask-128 to mask-58 failed");
-            }
-        }
-        this.matrix58 = CommonUtils.listToIntArray(matrix58);
-        this.super58A = superA;
-        this.super58B = superB;
     }
 
     public byte[] decrypt(byte[] data) {

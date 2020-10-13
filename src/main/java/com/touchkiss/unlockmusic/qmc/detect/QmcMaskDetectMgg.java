@@ -76,18 +76,6 @@ public class QmcMaskDetectMgg implements Detector {
         return new QmcMask(matrix, superA, superB);
     }
 
-    public static class MatrixConfidence {
-        private Map<Short, Short> confidence = new HashMap<>();
-
-        public Map<Short, Short> getConfidence() {
-            return confidence;
-        }
-
-        public void setConfidence(Map<Short, Short> confidence) {
-            this.confidence = confidence;
-        }
-    }
-
     int getMask58Index(int idx128) {
         if (idx128 > 127) {
             idx128 = idx128 % 128;
@@ -126,5 +114,17 @@ public class QmcMaskDetectMgg implements Detector {
             }
         }
         return result;
+    }
+
+    public static class MatrixConfidence {
+        private Map<Short, Short> confidence = new HashMap<>();
+
+        public Map<Short, Short> getConfidence() {
+            return confidence;
+        }
+
+        public void setConfidence(Map<Short, Short> confidence) {
+            this.confidence = confidence;
+        }
     }
 }
